@@ -411,6 +411,7 @@
             return;
         }
         [visibleMenuViewController endAppearanceTransition];
+        strongSelf.menuViewContainer.transform = CGAffineTransformIdentity;
         if (!strongSelf.visible && [strongSelf.delegate conformsToProtocol:@protocol(RESideMenuDelegate)] && [strongSelf.delegate respondsToSelector:@selector(sideMenu:didHideMenuViewController:)]) {
             [strongSelf.delegate sideMenu:strongSelf didHideMenuViewController:rightMenuVisible ? strongSelf.rightMenuViewController : strongSelf.leftMenuViewController];
         }
@@ -785,6 +786,10 @@
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
     if (self.visible) {
+        BOOL rightMenuVisible = self.rightMenuVisible;
+        UIViewController *visibleMenuViewController = rightMenuVisible ? self.rightMenuViewController : self.leftMenuViewController;
+        [visibleMenuViewController beginAppearanceTransition:YES animated:YES];
+
         self.menuViewContainer.bounds = self.view.bounds;
         self.contentViewContainer.transform = CGAffineTransformIdentity;
         self.contentViewContainer.frame = self.view.bounds;
@@ -808,8 +813,16 @@
         
         self.contentViewContainer.center = center;
     }
-    
+
     [self updateContentViewShadow];
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    if (self.visible) {
+        BOOL rightMenuVisible = self.rightMenuVisible;
+        UIViewController *visibleMenuViewController = rightMenuVisible ? self.rightMenuViewController : self.leftMenuViewController;
+        [visibleMenuViewController endAppearanceTransition];
+    }
 }
 
 #pragma mark -
